@@ -6,20 +6,7 @@ void Gamepad::setup() {
   packetSerial.setPacketHandler(&onPacketReceived, this);
 }
 
-void Gamepad::read() {
-  // state.dpad = 0;
-
-  // state.buttons = !digitalRead(14) << 1;
-
-  // state.lx = GAMEPAD_JOYSTICK_MID;
-  // state.ly = GAMEPAD_JOYSTICK_MID;
-  // state.rx = GAMEPAD_JOYSTICK_MID;
-  // state.ry = GAMEPAD_JOYSTICK_MID;
-  // state.lt = 0;
-  // state.rt = 0;
-
-  packetSerial.update();
-}
+void Gamepad::read() { packetSerial.update(); }
 
 void Gamepad::onPacketReceived(const uint8_t* buffer, size_t size) {
   crc8.restart();
