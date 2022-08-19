@@ -11,6 +11,7 @@ Gamepad gamepad(GAMEPAD_DEBOUNCE_MILLIS);
 
 void setup();
 void loop();
+void hid_task();
 
 void setup() {
   gamepad.setup();
@@ -23,29 +24,8 @@ void setup() {
 }
 
 void loop() {
-  static void *report;
-  static const uint16_t reportSize = gamepad.getReportSize();
-  static const uint32_t intervalMS = 1;
-  static uint32_t nextRuntime = 0;
-  static Gamepad snapshot;
-
-  if (getMillis() - nextRuntime < 0) return;
-
-  gamepad.read();
-#if GAMEPAD_DEBOUNCE_MILLIS > 0
-  gamepad.debounce();
-#endif
-  gamepad.hotkey();
-  gamepad.process();
-  report = gamepad.getReport();
-
-  if (tud_suspended()) tud_remote_wakeup();
-
-  if (tud_hid_ready()) tud_hid_report(0, report, reportSize);
-
+  hid_task();
   tud_task();
-
-  nextRuntime = getMillis() + intervalMS;
 }
 
 /* USB HID Callbacks (Required) */
@@ -72,4 +52,28 @@ void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id,
                            uint16_t bufsize) {
   // echo back anything we received from host
   tud_hid_report(report_id, buffer, bufsize);
+}
+
+void hid_task() {
+  static void *report;
+  static const uint16_t reportSize = gamepad.getReportSize();
+  static const uint32_t intervalMS = 1;
+  static uint32_t nextRuntime = 0;
+  static Gamepad snapshot;
+
+  if (getMillis() - nextRuntime < 0) return;
+
+  gamepad.read();
+#if GAMEPAD_DEBOUNCE_MILLIS > 0
+  gamepad.debounce();
+#endif
+  gamepad.hotkey();
+  gamepad.process();
+  report = gamepad.getReport();
+
+  if (tud_suspended()) tud_remote_wakeup();
+
+  if (tud_hid_ready()) tud_hid_report(0, report, reportSize);
+
+  nextRuntime = getMillis() + intervalMS;
 }
