@@ -12,6 +12,7 @@ Gamepad gamepad(GAMEPAD_DEBOUNCE_MILLIS);
 void setup();
 void loop();
 void hid_task();
+void cdc_task();
 
 void setup() {
   gamepad.setup();
@@ -25,6 +26,7 @@ void setup() {
 
 void loop() {
   hid_task();
+  cdc_task();
   tud_task();
 }
 
@@ -76,4 +78,20 @@ void hid_task() {
   if (tud_hid_ready()) tud_hid_report(0, report, reportSize);
 
   nextRuntime = getMillis() + intervalMS;
+}
+
+void cdc_task() {
+  if (tud_cdc_available()) {
+    // read datas
+    char buf[64];
+    uint32_t count = tud_cdc_read(buf, sizeof(buf));
+    (void)count;
+
+    // Echo back
+    // Note: Skip echo by commenting out write() and write_flush()
+    // for throughput test e.g
+    //    $ dd if=/dev/zero of=/dev/ttyACM0 count=10000
+    tud_cdc_write(buf, count);
+    tud_cdc_write_flush();
+  }
 }
