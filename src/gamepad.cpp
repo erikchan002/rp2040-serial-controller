@@ -2,7 +2,7 @@
 
 void Gamepad::setup() {
   crc8 = CRC8();
-  packetSerial.begin(115200);
+  packetSerial.begin(921600);
   packetSerial.setPacketHandler(&onPacketReceived, this);
 }
 
